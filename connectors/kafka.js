@@ -4,6 +4,7 @@ const { Kafka } = require('kafkajs')
 const validate = require('../validation/kafka');
 const messages = require('../constants/messages');
 const shopProcessor = require('../processors/shop');
+const mongoose = require('mongoose');
 
 const kafka = new Kafka({
   clientId: `${process.env.CLIENT_ID}-${process.env.ENV}`,
@@ -16,6 +17,38 @@ const kafka = new Kafka({
     password: process.env.KAFKA_SASL_PASSWORD
   },
 });
+// Connect to MongoDB
+connectToMongo();
+//model and schema
+
+const matchSchema = new mongoose.Schema({
+  matchNumber: Number,
+  roundNumber: Number,
+  dateUtc: Date,
+  location: String,
+  availability: {
+    category1: {
+      available: Number,
+      pending: Number,
+      price: Number,
+    },
+    category2: {
+      available: Number,
+      pending: Number,
+      price: Number,
+    },
+    category3: {
+      available: Number,
+      pending: Number,
+      price: Number,
+    },
+  },
+  homeTeam: String,
+  awayTeam: String,
+  group: String,
+});
+
+const Match = mongoose.model('Match', matchSchema);
 
 // Kafka Topics
 const topic = `${process.env.TOPIC_FIFA_TICKET_SALES}-${process.env.ENV}`;
@@ -84,7 +117,6 @@ const startKafkaConsumer = async () => {
           console.log('cannot process master list message with validation error:', validationError.message)
           return;
         }
-
         // call the processor
         await shopProcessor.processMasterlist(parsedMessage);
       } catch (e) {
