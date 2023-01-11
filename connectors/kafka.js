@@ -4,8 +4,6 @@ const { Kafka } = require('kafkajs')
 const validate = require('../validation/kafka');
 const messages = require('../constants/messages');
 const shopProcessor = require('../processors/shop');
-const mongoose = require('mongoose');
-const connectToMongo = require('../connectors/mongo');
 const kafka = new Kafka({
   clientId: `${process.env.CLIENT_ID}-${process.env.ENV}`,
   brokers: [process.env.KAFKA_BROKERS],
@@ -17,37 +15,7 @@ const kafka = new Kafka({
     password: process.env.KAFKA_SASL_PASSWORD
   },
 });
-// Connect to MongoDB
-//model and schema
 
-const matchSchema = new mongoose.Schema({
-  matchNumber: Number,
-  roundNumber: Number,
-  dateUtc: Date,
-  location: String,
-  availability: {
-    category1: {
-      available: Number,
-      pending: Number,
-      price: Number,
-    },
-    category2: {
-      available: Number,
-      pending: Number,
-      price: Number,
-    },
-    category3: {
-      available: Number,
-      pending: Number,
-      price: Number,
-    },
-  },
-  homeTeam: String,
-  awayTeam: String,
-  group: String,
-});
-
-const Match = mongoose.model('Match', matchSchema);
 
 // Kafka Topics
 const topic = `${process.env.TOPIC_FIFA_TICKET_SALES}-${process.env.ENV}`;

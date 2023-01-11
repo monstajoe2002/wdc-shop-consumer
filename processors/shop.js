@@ -71,7 +71,9 @@ const processReservedTicket = async (message) => {
     const update = {
       $inc: {
         [`availability.category${category}.available`]: -quantity,
-        [`availability.category${category}.pending`]: quantity
+      },
+      $set: {
+        [`availability.category${category}.pending`]:0
       }
     };
     await Ticket.updateOne({ matchNumber: matchNumber }, update);
