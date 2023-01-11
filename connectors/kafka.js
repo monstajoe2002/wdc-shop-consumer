@@ -5,7 +5,7 @@ const validate = require('../validation/kafka');
 const messages = require('../constants/messages');
 const shopProcessor = require('../processors/shop');
 const mongoose = require('mongoose');
-
+const connectToMongo = require('../connectors/mongo');
 const kafka = new Kafka({
   clientId: `${process.env.CLIENT_ID}-${process.env.ENV}`,
   brokers: [process.env.KAFKA_BROKERS],
@@ -18,7 +18,6 @@ const kafka = new Kafka({
   },
 });
 // Connect to MongoDB
-connectToMongo();
 //model and schema
 
 const matchSchema = new mongoose.Schema({
@@ -77,7 +76,6 @@ const startKafkaConsumer = async () => {
           console.log('cannot process empty message')
           return;
         }
-
         // process message if there is no validation error
         const validationError = validate.kafkaMessage(parsedMessage);
         if (!isEmpty(validationError)) {
@@ -91,7 +89,7 @@ const startKafkaConsumer = async () => {
           [messages.TICKET_PENDING]: shopProcessor.processPendingTicket,
           [messages.TICKET_CANCELLED]: shopProcessor.processCancelledTicket,
           [messages.TICKET_RESERVED]: shopProcessor.processReservedTicket,
-        }[messageType];      
+        }[messageType];
 
         // call the processor
         await processMessage(parsedMessage);
